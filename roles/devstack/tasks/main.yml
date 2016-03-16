@@ -1,0 +1,48 @@
+---
+- name: install packages
+  dnf:
+      name: '{{ item }}'
+  with_items: '{{ packages }}'
+  become: yes
+  become_method: sudo
+
+- name: clone Devstack
+  git:
+     repo: '{{ devstack_repo_url }}'
+     dest: '{{ local_devstack_dir }}'
+ 
+- include: ssh_setup.yml
+
+- name: Setup localrc
+  get_url:
+      url: '{{ localrc_url }}'
+      dest: '{{ local_devstack_dir }}/localrc'
+
+- name: Run devstack
+  shell: ./stack.sh
+  args:
+      chdir: "{{ local_devstack_dir }}"
+  environment: 
+      SERVICE_HOST: "{{ controller_ip }}"
+
+- name: Mount the instance directory
+  become: yes
+  become_method: sudo
+  mount: 
+       name: /opt/stack/data/nova/instances
+       fstype: nfs
+       src: "{{ controller_ip }}:/opt/stack/data/nova/instances"
+       state: mounted
+       opts: nolock
+  when: enable_nfs and run_compute_only_tasks
+ 
+- name: Build hosts file
+  lineinfile:
+      dest: /etc/hosts
+      regexp: ".*{{ hostvars[item].ansible_fqdn }}$"
+      line: "{{ hostvars[item].ansible_default_ipv4.address }} {{ hostvars[item].ansible_fqdn }}"
+      state: present
+  when: hostvars[item].ansible_default_ipv4.address is defined
+  with_items: groups['all']
+  become: yes
+  become_method: sudo

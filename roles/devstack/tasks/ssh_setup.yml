@@ -1,0 +1,33 @@
+---
+- name: Upload ssh keys
+  copy:
+      src: "{{ item }}"
+      dest: /home/fedora/.ssh/
+  with_items: [ "{{ssh_public_key }}", "{{ ssh_private_key }}" ]
+
+- name: Copy ssh keys to root dir (needed because we can't log in as root)
+  command: cp "/home/fedora/.ssh/{{ item }}" /root/.ssh
+  with_items: [ "{{ssh_public_key }}", "{{ ssh_private_key }}" ]
+  become: yes
+  become_method: sudo
+
+- name: Set permissions on the private key
+  file: 
+      path: "/root/.ssh/{{ ssh_private_key }}"
+      mode: 0600
+  become: yes
+  become_method: sudo
+
+- name: Disable StrictHostKeyChecking
+  lineinfile: 
+      dest: /etc/ssh/ssh_config
+      regexp: ".*StrictHostKeyChecking.*"
+      line: "  StrictHostKeyChecking no"
+      state: present
+  become: yes
+  become_method: sudo
+
+- name: Allow passwordless login as fedora with ssh_keys (for live migration)
+  authorized_key:
+      user: fedora
+      key: "{{ lookup('file', ssh_public_key) }}"

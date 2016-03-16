@@ -1,0 +1,9 @@
+---
+devstack_repo_url: https://git.openstack.org/openstack-dev/devstack
+local_devstack_dir: /home/fedora/devstack
+ssh_private_key: ./id_rsa
+ssh_public_key: ./id_rsa.pub
+controller_ip: "{{ hostvars[groups['controller'][0]]['ansible_default_ipv4']['address'] }}"
+packages:
+    - git
+    - libselinux-python

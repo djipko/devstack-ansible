@@ -1,0 +1,22 @@
+---
+
+- hosts: [controller, compute]
+  remote_user: fedora
+  gather_facts: True
+  tasks: []
+
+- hosts: controller
+  remote_user: fedora
+  roles:
+      - role: devstack
+      - role: ansible-role-nfs
+        become: yes
+        become_method: sudo
+        nfs_exports: { "/opt/stack/data/nova/instances *(rw,sync,no_root_squash)" }
+    
+- hosts: compute
+  remote_user: fedora
+  roles:
+      - role: devstack
+        localrc_url: https://raw.githubusercontent.com/djipko/devstack_rcfiles/master/localrc-neutron-cpu
+        run_compute_only_tasks: True

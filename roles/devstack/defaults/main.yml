@@ -1,0 +1,4 @@
+---
+localrc_url: https://raw.githubusercontent.com/djipko/devstack_rcfiles/master/localrc-neutron 
+enable_nfs: True
+run_compute_only_tasks: False

@@ -1,0 +1,6 @@
+*.swp
+.venv
+id_rsa*
+ansible.cfg
+roles/ansible-role-nfs/
+devstack-hosts
