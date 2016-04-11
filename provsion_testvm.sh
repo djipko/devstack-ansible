@@ -21,14 +21,14 @@ fi
 
 nova boot --image ${IMAGE} --flavor ${FLAVOR} --nic net-name=internal --key-name ${KEY} ${NAME}
 echo "Waiting for ${NAME} to come up..."
-while [ -n "$(nova list | grep $NAME".*ACTIVE")" ]
+while [ -z "$(nova list | grep $NAME".*ACTIVE")" ]
 do
     sleep 1
 done
 echo "${NAME} is up!"
 FLOATING_IP_ID=$(neutron floatingip-list | grep $FLOATING_IP | awk '{ print $2 }')
 echo "Floating IP ID found: $FLOATING_IP_ID"
-STATIC_IP=$(nova list | perl -n -e "/${NAME}.*internal=(\\d+\\.\\d+\\.\\d+\\.\\d+)/ && print \$1" )
+STATIC_IP=$(nova list | perl -n -e "/^.*${NAME}.*internal=(\\d+\\.\\d+\\.\\d+\\.\\d+)/ && print \$1" )
 echo "Static IP found: $STATIC_IP"
 PORT_ID=$(neutron port-list | grep $STATIC_IP | awk '{ print $2 }')
 echo "Port found: $PORT_ID"
