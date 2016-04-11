@@ -1,12 +1,8 @@
 ---
-- name: Upload ssh keys
+- name: Upload ssh keys to directly to root home
   copy:
       src: "{{ item }}"
-      dest: /home/fedora/.ssh/
-  with_items: [ "{{ssh_public_key }}", "{{ ssh_private_key }}" ]
-
-- name: Copy ssh keys to root dir (needed because we can't log in as root)
-  command: cp "/home/fedora/.ssh/{{ item }}" /root/.ssh
+      dest: /root/.ssh/
   with_items: [ "{{ssh_public_key }}", "{{ ssh_private_key }}" ]
   become: yes
   become_method: sudo
